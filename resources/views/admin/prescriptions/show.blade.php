@@ -161,43 +161,42 @@
                 <div class="text-5xl font-serif italic font-bold text-[#1e3a8a] mb-8 opacity-90 drop-shadow-sm print:drop-shadow-none">Rx,</div>
                 
                 <div class="flex-1 space-y-5">
-                    @forelse($prescription->prescriptionMedicines as $index => $medicineData)
-                        <div class="relative flex gap-4 items-start bg-slate-50 print:bg-white border border-slate-200 print:border-b print:border-x-0 print:border-t-0 print:rounded-none p-4 print:px-0 print:py-3 rounded-lg shadow-sm print:shadow-none">
-                            
-                            <!-- Serial Number Badge -->
-                            <div class="flex items-center justify-center bg-[#1e3a8a] text-white font-bold w-7 h-7 rounded-full text-xs shadow-sm mt-1 shrink-0 print:border print:border-[#1e3a8a] print:bg-white print:text-[#1e3a8a]">
-                                {{ $index + 1 }}
-                            </div>
-                            
-                            <div class="flex-1 flex flex-wrap gap-x-4 gap-y-2 items-center">
-                                <!-- Medicine Name -->
-                                <div class="flex-1 min-w-[200px]">
-                                    <h4 class="text-base font-bold text-slate-900">{{ $medicineData->medicine->name ?? 'Unknown Medicine' }}</h4>
-                                </div>
+                    @forelse($medicinePages as $pageIndex => $medicinePage)
+                        <div class="space-y-5">
+                            @foreach($medicinePage as $index => $medicineData)
+                                @php $globalIndex = ($pageIndex * 17) + $index + 1; @endphp
+                                <div class="relative flex gap-4 items-start bg-slate-50 print:bg-white border border-slate-200 print:border-b print:border-x-0 print:border-t-0 print:rounded-none p-4 print:px-0 print:py-3 rounded-lg shadow-sm print:shadow-none">
+                                    <div class="flex items-center justify-center bg-[#1e3a8a] text-white font-bold w-7 h-7 rounded-full text-xs shadow-sm mt-1 shrink-0 print:border print:border-[#1e3a8a] print:bg-white print:text-[#1e3a8a]">
+                                        {{ $globalIndex }}
+                                    </div>
 
-                                <!-- Dosing Pattern -->
-                                <div class="flex items-center gap-2 text-sm font-bold text-[#1e3a8a] shrink-0 bg-white border border-slate-200 rounded px-3 py-1 print:border-none print:bg-transparent print:p-0">
-                                    <span>{{ $medicineData->morning_dose ?: '0' }}</span>
-                                    <span class="text-slate-400 font-normal">+</span>
-                                    <span>{{ $medicineData->afternoon_dose ?: '0' }}</span>
-                                    <span class="text-slate-400 font-normal">+</span>
-                                    <span>{{ $medicineData->night_dose ?: '0' }}</span>
-                                </div>
+                                    <div class="flex-1 flex flex-wrap gap-x-4 gap-y-2 items-center">
+                                        <div class="flex-1 min-w-[200px]">
+                                            <h4 class="text-base font-bold text-slate-900">{{ $medicineData->medicine->name ?? 'Unknown Medicine' }}</h4>
+                                        </div>
 
-                                <!-- Duration -->
-                                <div class="w-28 text-right">
-                                    <span class="text-sm font-semibold text-slate-700 bg-slate-200/50 px-2 py-1 rounded print:bg-transparent print:p-0">{{ $medicineData->duration }}</span>
-                                </div>
+                                        <div class="flex items-center gap-2 text-sm font-bold text-[#1e3a8a] shrink-0 bg-white border border-slate-200 rounded px-3 py-1 print:border-none print:bg-transparent print:p-0">
+                                            <span>{{ $medicineData->morning_dose ?: '0' }}</span>
+                                            <span class="text-slate-400 font-normal">+</span>
+                                            <span>{{ $medicineData->afternoon_dose ?: '0' }}</span>
+                                            <span class="text-slate-400 font-normal">+</span>
+                                            <span>{{ $medicineData->night_dose ?: '0' }}</span>
+                                        </div>
 
-                                <!-- Additional Instructions -->
-                                @if($medicineData->instruction)
-                                <div class="w-full mt-1">
-                                    <p class="text-xs text-slate-600 bg-white border border-slate-100 rounded px-3 py-1.5 print:bg-transparent print:border-none print:p-0 print:italic">
-                                        <span class="font-semibold text-slate-500 mr-1">Inst:</span> {{ $medicineData->instruction }}
-                                    </p>
+                                        <div class="w-28 text-right">
+                                            <span class="text-sm font-semibold text-slate-700 bg-slate-200/50 px-2 py-1 rounded print:bg-transparent print:p-0">{{ $medicineData->duration }}</span>
+                                        </div>
+
+                                        @if($medicineData->instruction)
+                                            <div class="w-full mt-1">
+                                                <p class="text-xs text-slate-600 bg-white border border-slate-100 rounded px-3 py-1.5 print:bg-transparent print:border-none print:p-0 print:italic">
+                                                    <span class="font-semibold text-slate-500 mr-1">Inst:</span> {{ $medicineData->instruction }}
+                                                </p>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
-                                @endif
-                            </div>
+                            @endforeach
                         </div>
                     @empty
                         <div class="text-center py-10 text-slate-400 italic">

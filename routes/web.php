@@ -29,8 +29,10 @@ Route::get('/', [PublicController::class, 'index'])->name('home');
 Route::post('/appointments', [PublicController::class, 'storeAppointment'])->name('appointments.store');
 Route::get('/appointments/patient/{uid}', [PublicController::class, 'getPatientByUid'])->name('appointments.patient.lookup');
 
-Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
+Route::get('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::get('/admin/secret-signup', [AdminAuthController::class, 'showSecretSignup'])->name('admin.secret.signup');
+Route::post('/admin/secret-signup', [AdminAuthController::class, 'secretSignup'])->name('admin.secret.signup.submit');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 Route::middleware('admin')->group(function () {
@@ -203,6 +205,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/admin/roles', [RoleController::class, 'index'])->name('admin.roles.index');
     Route::get('/admin/roles/create', [RoleController::class, 'create'])->name('admin.roles.create');
     Route::post('/admin/roles', [RoleController::class, 'store'])->name('admin.roles.store');
+    Route::post('/admin/roles/assign-user', [RoleController::class, 'assignUser'])->name('admin.roles.assign-user');
     Route::get('/admin/roles/{role}/edit', [RoleController::class, 'edit'])->name('admin.roles.edit');
     Route::put('/admin/roles/{role}', [RoleController::class, 'update'])->name('admin.roles.update');
     Route::delete('/admin/roles/{role}', [RoleController::class, 'destroy'])->name('admin.roles.destroy');

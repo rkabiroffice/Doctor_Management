@@ -10,6 +10,7 @@ use App\Models\Medicine;
 use App\Models\Prescription;
 use App\Models\PrescriptionMedicine;
 use App\Models\Setting;
+use App\Services\PrescriptionPageService;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
 use PDF;
@@ -191,7 +192,7 @@ class PrescriptionController extends Controller
         return view('admin.prescriptions.edit', compact('prescription', 'appointments', 'settings', 'doctorProfile', 'education', 'existingMedicines', 'selectedMedicineNames'));
     }
 
-    public function show(Prescription $prescription)
+    public function show(Prescription $prescription, PrescriptionPageService $pageService)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -201,8 +202,9 @@ class PrescriptionController extends Controller
         $education = Education::orderBy('year_completed', 'asc')->get();
         $settings = Setting::pluck('value', 'key')->toArray();
         $doctorProfile = DoctorProfile::first();
+        $medicinePages = $pageService->splitMedicines(collect($prescription->prescriptionMedicines), 17);
 
-        return view('admin.prescriptions.show', compact('prescription', 'settings', 'doctorProfile', 'education'));
+        return view('admin.prescriptions.show', compact('prescription', 'settings', 'doctorProfile', 'education', 'medicinePages'));
     }
 
     public function update(Request $request, Prescription $prescription, ReportService $reportService)
@@ -291,7 +293,7 @@ class PrescriptionController extends Controller
         return redirect()->route('admin.appointments.show', $appointmentId)->with('success', 'Prescription deleted successfully.');
     }
 
-    public function downloadPdf(Prescription $prescription)
+    public function downloadPdf(Prescription $prescription, PrescriptionPageService $pageService)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -301,6 +303,7 @@ class PrescriptionController extends Controller
         $education = Education::orderByDesc('year_completed')->get();
         $settings = Setting::pluck('value', 'key')->toArray();
         $doctorProfile = DoctorProfile::first();
+        $medicinePages = $pageService->splitMedicines(collect($prescription->prescriptionMedicines), 17);
 
         $config = [
             'format'           => 'A4',
@@ -314,7 +317,7 @@ class PrescriptionController extends Controller
 
         // Load the view and pass data + custom mPDF config
         $pdf = PDF::loadView('admin.prescriptions.pdf', 
-            compact('prescription', 'settings', 'doctorProfile', 'education'), 
+            compact('prescription', 'settings', 'doctorProfile', 'education', 'medicinePages'), 
             [], 
             $config
         );

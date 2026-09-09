@@ -19,7 +19,7 @@ class Helper
 
         $path = $file->storeAs($directory, $filename, 'public');
 
-        return Storage::url($path);
+        return url('storage/app/public/'.$path);
     }
 
     public static function storeUploadedFile(Request $request, string $field, string $directory = 'uploads', ?string $existing = null): ?string
@@ -32,7 +32,15 @@ class Helper
         $filename = time() . '_' . Str::random(32) . '.' . $file->extension();
         $path = $file->storeAs($directory, $filename, 'public');
 
-        return Storage::url($path);
+ 	return url('storage/app/public/'.$path);
+    }
+
+    protected static function buildPublicUrl(string $path): string
+    {
+        $relativePath = Str::replaceFirst('public/', '', $path);
+        $relativePath = ltrim($relativePath, '/');
+
+        return url('/public/' . $relativePath);
     }
 
     public static function normalizeYoutubeUrl(?string $url): ?string

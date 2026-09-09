@@ -256,32 +256,35 @@
 
                         <!-- Medicines Loop -->
                         <table width="100%">
-                            @forelse($prescription->prescriptionMedicines as $index => $medicineData)
-                            <tr>
-                                <td width="5%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
-                                    <div style="width: 20px; height: 20px; border: 2px solid #1e3a8a; border-radius: 50%; text-align: center; line-height: 20px; font-weight: bold; color: #1e3a8a; font-size: 11px;">
-                                        {{ $index + 1 }}
-                                    </div>
-                                </td>
-                                <td width="55%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-left: 10px;">
-                                    <div class="font-bold text-base" style="color: #0f172a; margin-bottom: 5px;">{{ $medicineData->medicine->name ?? 'Unknown Medicine' }}</div>
-                                    @if($medicineData->instruction)
-                                        <div class="text-xs bangla" style="color: #475569; font-style: italic;">
-                                            <span style="font-weight: bold; font-style: normal;">Instruction:</span> {{ $medicineData->instruction }}
-                                        </div>
-                                    @endif
-                                </td>
-                                <td width="20%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;">
-                                    <span class="text-primary font-bold text-sm">
-                                        {{ $medicineData->morning_dose ?: '0' }} <span style="color:#cbd5e1; font-weight:normal;">+</span> 
-                                        {{ $medicineData->afternoon_dose ?: '0' }} <span style="color:#cbd5e1; font-weight:normal;">+</span> 
-                                        {{ $medicineData->night_dose ?: '0' }}
-                                    </span>
-                                </td>
-                                <td width="20%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; text-align: right;">
-                                    <span class="font-bold bangla" style="color: #334155; font-size: 13px;">{{ $medicineData->duration }}</span>
-                                </td>
-                            </tr>
+                            @forelse($medicinePages as $pageIndex => $medicinePage)
+                                @foreach($medicinePage as $index => $medicineData)
+                                    @php $globalIndex = ($pageIndex * 17) + $index + 1; @endphp
+                                    <tr>
+                                        <td width="5%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
+                                            <div style="width: 20px; height: 20px; border: 2px solid #1e3a8a; border-radius: 50%; text-align: center; line-height: 20px; font-weight: bold; color: #1e3a8a; font-size: 11px;">
+                                                {{ $globalIndex }}
+                                            </div>
+                                        </td>
+                                        <td width="55%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-left: 10px;">
+                                            <div class="font-bold text-base" style="color: #0f172a; margin-bottom: 5px;">{{ $medicineData->medicine->name ?? 'Unknown Medicine' }}</div>
+                                            @if($medicineData->instruction)
+                                                <div class="text-xs bangla" style="color: #475569; font-style: italic;">
+                                                    <span style="font-weight: bold; font-style: normal;">Instruction:</span> {{ $medicineData->instruction }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td width="20%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                                            <span class="text-primary font-bold text-sm">
+                                                {{ $medicineData->morning_dose ?: '0' }} <span style="color:#cbd5e1; font-weight:normal;">+</span>
+                                                {{ $medicineData->afternoon_dose ?: '0' }} <span style="color:#cbd5e1; font-weight:normal;">+</span>
+                                                {{ $medicineData->night_dose ?: '0' }}
+                                            </span>
+                                        </td>
+                                        <td width="20%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; text-align: right;">
+                                            <span class="font-bold bangla" style="color: #334155; font-size: 13px;">{{ $medicineData->duration }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @empty
                             <tr>
                                 <td colspan="4" align="center" style="padding: 40px; color: #94a3b8; font-style: italic;">

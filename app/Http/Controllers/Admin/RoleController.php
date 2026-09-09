@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
@@ -36,8 +37,9 @@ class RoleController extends Controller
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
+        $users = User::orderBy('name')->get();
 
-        return view('admin.roles.index', compact('roles', 'search'));
+        return view('admin.roles.index', compact('roles', 'search', 'users'));
     }
 
     public function create()
@@ -107,5 +109,22 @@ class RoleController extends Controller
         $role->delete();
 
         return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
+    }
+
+    public function assignUser(Request $request)
+    {
+        if (! session('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'role_id' => ['required', 'exists:roles,id'],
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+        $user->update(['role_id' => $validated['role_id']]);
+
+        return redirect()->route('admin.roles.index')->with('success', 'User role assigned successfully.');
     }
 }

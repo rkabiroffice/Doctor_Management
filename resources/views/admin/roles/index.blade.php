@@ -26,6 +26,32 @@
         <a href="{{ route('admin.roles.create') }}" class="bg-orange-600 hover:bg-orange-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-all duration-150">Add New</a>
     </div>
 </div>
+<div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Assign Role to User</h2>
+    <form action="{{ route('admin.roles.assign-user') }}" method="POST" class="flex flex-wrap items-end gap-3">
+        @csrf
+        <div class="min-w-[220px] flex-1">
+            <label class="mb-1 block text-sm font-medium text-slate-700">Select User</label>
+            <select name="user_id" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500" required>
+                <option value="">Choose user...</option>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="min-w-[220px] flex-1">
+            <label class="mb-1 block text-sm font-medium text-slate-700">Select Role</label>
+            <select name="role_id" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500" required>
+                <option value="">Choose role...</option>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button class="rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-orange-700">Assign Role</button>
+    </form>
+</div>
+
 <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
     <table class="min-w-full">
         <thead class="bg-slate-50 border-b border-slate-200">

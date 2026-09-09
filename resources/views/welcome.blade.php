@@ -96,53 +96,69 @@
 @endforeach
 
 @foreach($aboutSections as $about)
-<section id="about" class="bg-white py-24">
-    <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-stretch">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col h-full">
-            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">About</p>
+<section id="about" class="bg-white py-20">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="text-center mb-10">
+            <p class="text-xl font-medium text-slate-400 uppercase tracking-wider">About</p>
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight mt-3">{{ $about->title }}</h2>
-            @if($about->subtitle)
-                <p class="text-sm text-slate-500 mt-2">{{ $about->subtitle }}</p>
-            @endif
-            <p class="text-sm text-slate-600 mt-5 leading-7">{{ $about->content }}</p>
         </div>
-        @if($about->image_url)
-            <div class="rounded-2xl overflow-hidden shadow-lg h-full">
-                <img src="{{ $about->image_url }}" alt="About" class="w-full h-full object-cover rounded-[1.5rem]">
+
+        <div class="flex flex-col lg:flex-row gap-10 items-stretch lg:h-[450px]">
+            
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col justify-center overflow-y-auto order-2 lg:order-1">
+                @if($about->subtitle)
+                    <h3 class="text-sm text-slate-500 mt-2">{{ $about->subtitle }}</h3>
+                @endif
+                <p class="text-sm text-slate-600 mt-5 leading-7">{{ $about->content }}</p>
             </div>
-        @endif
+            
+            @if($about->image_url)
+                <div class="h-[300px] lg:h-full w-full lg:w-auto flex-shrink-0 rounded-2xl overflow-hidden shadow-lg order-1 lg:order-2">
+                    <img src="{{ $about->image_url }}" alt="About" class="w-full h-full lg:w-auto object-cover lg:object-contain">
+                </div>
+            @endif
+            
+        </div>
     </div>
 </section>
 @endforeach
 
 @foreach($biographies as $bio)
 <section id="bio" class="bg-slate-50 py-20">
-    <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-stretch">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col h-full">
-            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Biography</p>
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="text-center mb-10">
+            <p class="text-xl font-medium text-slate-400 uppercase tracking-wider">Biography</p>
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight mt-3">{{ $bio->title }}</h2>
-            @if($bio->subtitle)
-                <p class="text-sm text-slate-500 mt-2">{{ $bio->subtitle }}</p>
-            @endif
-            <p class="text-sm text-slate-600 mt-5 leading-7">{{ $bio->content }}</p>
         </div>
-        @if($bio->video_url)
-            <div class="bg-slate-50 rounded-3xl border border-slate-200 p-6 flex flex-col h-full">
-                <div class="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-md flex-1">
-                    @if($bio->isYoutubeLink($bio->video_url))
-                        <iframe src="{{ $bio->video_embed_url }}" class="w-full h-full" allowfullscreen></iframe>
-                    @else
-                        <video src="{{ $bio->video_embed_url }}" controls class="w-full h-full object-cover"></video>
-                    @endif
-                </div>
+
+        <div class="grid lg:grid-cols-2 gap-10 items-stretch">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col h-full">
+                @if($bio->subtitle)
+                    <h3 class="text-sm text-slate-500 mt-2">{{ $bio->subtitle }}</h3mt-3>
+                @endif
+                <p class="text-sm text-slate-600 mt-5 leading-7">{{ $bio->content }}</p>
             </div>
-        @elseif($bio->youtube_url)
-            <div class="bg-slate-50 rounded-3xl border border-slate-200 p-6 flex flex-col h-full">
-                <div class="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-md flex-1">
-                    <iframe src="{{ $bio->youtube_url }}" class="w-full h-full" allowfullscreen></iframe>
+            @if($bio->video_url)
+                <div class="bg-slate-50 rounded-3xl border border-slate-200 p-6 flex flex-col h-full">
+                    <div class="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-md flex-1">
+                        @if($bio->isYoutubeLink($bio->video_url))
+                            <iframe src="{{ $bio->video_embed_url }}" class="w-full h-full" allowfullscreen></iframe>
+                        @else
+                            <video src="{{ $bio->video_embed_url }}" controls class="w-full h-full object-cover"></video>
+                        @endif
+                    </div>
                 </div>
-            </div>
-        @endif
+            @elseif($bio->youtube_url)
+                <div class="bg-slate-50 rounded-3xl border border-slate-200 p-6 flex flex-col h-full">
+                    <div class="aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-md flex-1">
+                        <iframe src="{{ $bio->youtube_url }}" class="w-full h-full" allowfullscreen></iframe>
+                    </div>
+                </div>
+            @endif
+        </div>
+        
     </div>
 </section>
 @endforeach
@@ -200,9 +216,48 @@
             <p class="text-sm text-slate-600 mt-4">{{ $sections->get('blog')->subtitle ?? 'Browse articles and videos' }}</p>
         </div>
         <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4 pb-4">
+                @php
+                    $extractYouTubeThumbnail = function ($url) {
+                        if (empty($url)) {
+                            return null;
+                        }
+
+                        $host = parse_url($url, PHP_URL_HOST);
+                        $path = parse_url($url, PHP_URL_PATH) ?? '';
+
+                        if (str_contains($host ?? '', 'youtube.com')) {
+                            if (preg_match('/[?&]v=([a-zA-Z0-9_-]{11})/', $url, $matches)) {
+                                return 'https://img.youtube.com/vi/' . $matches[1] . '/hqdefault.jpg';
+                            }
+
+                            if (preg_match('#/embed/([a-zA-Z0-9_-]{11})#', $path, $matches)) {
+                                return 'https://img.youtube.com/vi/' . $matches[1] . '/hqdefault.jpg';
+                            }
+
+                            if (preg_match('#/shorts/([a-zA-Z0-9_-]{11})#', $path, $matches)) {
+                                return 'https://img.youtube.com/vi/' . $matches[1] . '/hqdefault.jpg';
+                            }
+                        }
+
+                        if (str_contains($host ?? '', 'youtu.be')) {
+                            if (preg_match('#^/([a-zA-Z0-9_-]{11})#', $path, $matches)) {
+                                return 'https://img.youtube.com/vi/' . $matches[1] . '/hqdefault.jpg';
+                            }
+                        }
+
+                        return null;
+                    };
+                @endphp
                 @foreach($blogs as $blog)
+                    @php
+                        $blogImageUrl = $blog->image_url ?? '';
+                        $youtubeThumbnail = $extractYouTubeThumbnail($blog->youtube_url ?? null);
+                        if ($youtubeThumbnail) {
+                            $blogImageUrl = $youtubeThumbnail;
+                        }
+                    @endphp
                     <article class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
-                        <img src="{{ $blog->image_url }}" alt="{{ $blog->title }}" class="w-full h-52 object-cover">
+                        <img src="{{ $blogImageUrl }}" alt="{{ $blog->title }}" class="w-full h-52 object-cover">
                         <div class="p-6 flex-1 flex flex-col">
                             <h3 class="text-lg font-semibold text-slate-900">{{ $blog->title }}</h3>
                             <p class="text-sm text-slate-600 mt-3 leading-7 flex-1">{{ $blog->excerpt }}</p>
