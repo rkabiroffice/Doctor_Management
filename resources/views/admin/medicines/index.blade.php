@@ -32,6 +32,7 @@
     <table class="min-w-full">
         <thead class="bg-slate-50 border-b border-slate-200">
             <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Serial No.</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Generic</th>
                 <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Strength</th>
@@ -42,6 +43,7 @@
         <tbody>
             @foreach($medicines as $medicine)
                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors duration-100">
+                    <td class="px-4 py-3.5 text-sm text-slate-700 font-medium">{{ $medicines->firstItem() + $loop->index }}</td>
                     <td class="px-4 py-3.5 text-sm text-slate-700 font-medium">{{ $medicine->name }}</td>
                     <td class="px-4 py-3.5 text-sm text-slate-700">{{ $medicine->generic_name }}</td>
                     <td class="px-4 py-3.5 text-sm text-slate-700">{{ $medicine->strength }}</td>

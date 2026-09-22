@@ -72,6 +72,49 @@
             </div>
         @endif
         <div class="border-t border-slate-200 pt-6 mt-6">
+            <h3 class="text-base font-semibold text-slate-900 mb-2">Prescription Header</h3>
+            <p class="text-sm text-slate-500 mb-5">These fields control only the header shown on prescription screen, print, and PDF pages.</p>
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Doctor Name</label>
+                <input type="text" name="prescription_doctor_name" value="{{ old('prescription_doctor_name', $settings['prescription_doctor_name'] ?? 'ডাঃ মোঃ রায়হান উদ্দিন') }}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900">
+            </div>
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Credentials</label>
+                <textarea name="prescription_credentials" rows="5" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900">{{ old('prescription_credentials', $settings['prescription_credentials'] ?? "এমবিবিএস (সি.ইউ), ডিডি (ইউ.কে)\nডিভিএস (চর্ম ও যৌন)\nসিসিডি (বারডেম-ডায়াবেটিস)\nএফসিজিপি (ফ্যামিলি মেডিসিন)\nপিজিটি (মেডিসিন)\nঢাকা মেডিকেল কলেজ ও হাসপাতাল\nট্রেইন্ড ইন এস্থেটিকস, লেজার, হেয়ার ট্রান্সপ্লান্ট এন্ড ডার্মাটোসার্জারী\nমাস্টার্স ইন মেল (Male) ইনফার্টিলিটি (ইউএসএ)\nফেলোশীপ ইন সেক্সুয়াল মেডিসিন (চেন্নাই, ইন্ডিয়া)।\nবিএমডিসি রেজিঃ A-81796") }}</textarea>
+            </div>
+            <div class="grid md:grid-cols-2 gap-5">
+                @foreach([
+                    'prescription_serial_label' => ['Serial Label', 'সিরিয়ালের জন্য :'],
+                    'prescription_phone' => ['Phone Numbers', "01647-386185\n01727-375664"],
+                    'prescription_serial_hours' => ['Serial Hours', '(সকাল ১১ টা - দুপুর ৩ টা পর্যন্ত)'],
+                    'prescription_visit_label' => ['Visit Label', 'রোগী দেখার সময় :'],
+                    'prescription_visit_hours' => ['Visit Hours', "প্রতি বৃহস্পতি, শুক্র ও শনিবার\n(দুপুর ২টা থেকে রাত ১০টা পর্যন্ত)"],
+                    'prescription_youtube_text' => ['YouTube Text', 'Dr.Rayhan Uddin'],
+                    'prescription_facebook_text' => ['Facebook Text', 'facebook.com/rayhan.uddin.33'],
+                    'prescription_specialties' => ['Specialties Banner', 'মেডিসিন, ডায়াবেটিস, পুরুষ বন্ধ্যত্ব, এলার্জী, চর্ম ও যৌন রোগে অভিজ্ঞ।'],
+                ] as $key => [$label, $default])
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ $label }}</label>
+                        <textarea name="{{ $key }}" rows="{{ str_contains($key, 'phone') || str_contains($key, 'hours') || str_contains($key, 'specialties') ? 2 : 1 }}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900">{{ old($key, $settings[$key] ?? $default) }}</textarea>
+                    </div>
+                @endforeach
+            </div>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Chamber Name</label>
+                    <input type="text" name="prescription_chamber_name" value="{{ old('prescription_chamber_name', $settings['prescription_chamber_name'] ?? 'পিওর সায়েন্টিফিক ডায়াগনস্টিক সার্ভিসেস্ লিঃ') }}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900">
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Chamber Address</label>
+                    <textarea name="prescription_chamber_address" rows="3" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900">{{ old('prescription_chamber_address', $settings['prescription_chamber_address'] ?? "ঢাকা মেডিকেল কলেজ ও হাসপাতাল ইউনিট-২\n(নতুন বিল্ডিং) গেইটের বিপরীত পার্শ্বে,\nলাজ ফার্মার সাথে, ঢাকা।") }}</textarea>
+                </div>
+            </div>
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Prescription Footer</label>
+                <textarea name="prescription_footer_text" rows="2" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900">{{ old('prescription_footer_text', $settings['prescription_footer_text'] ?? 'দিন পর আসবেন, সাক্ষাতের সময় ব্যবস্থাপত্র সাথে আনবেন।') }}</textarea>
+            </div>
+        </div>
+        <div class="border-t border-slate-200 pt-6 mt-6">
             <h3 class="text-base font-semibold text-slate-900 mb-5">Social Media Links</h3>
             @php
                 $facebookPages = old('social_facebook_pages', json_decode($settings['social_facebook_pages'] ?? '[]', true) ?: ['']);

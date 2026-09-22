@@ -14,8 +14,8 @@ return new class extends Migration
             $table->text('generic_name')->nullable();
             $table->text('strength')->nullable();
             $table->text('dosage_form')->nullable();
-            $table->string('manufacturer')->nullable();
-            $table->text('notes')->nullable();
+            $table->text('manufacturer')->nullable();
+            $table->text('ref of dcc')->nullable();
             $table->timestamps();
         });
     }

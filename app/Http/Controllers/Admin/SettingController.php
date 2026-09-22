@@ -52,6 +52,19 @@ class SettingController extends Controller
             'meta_keywords' => ['nullable', 'string', 'max:500'],
             // 'prescription_footer_text' => ['nullable', 'string', 'max:500'],
             'show_portfolio_sections' => ['nullable', 'in:0,1'],
+            'prescription_doctor_name' => ['nullable', 'string', 'max:255'],
+            'prescription_credentials' => ['nullable', 'string', 'max:3000'],
+            'prescription_serial_label' => ['nullable', 'string', 'max:255'],
+            'prescription_phone' => ['nullable', 'string', 'max:255'],
+            'prescription_serial_hours' => ['nullable', 'string', 'max:500'],
+            'prescription_visit_label' => ['nullable', 'string', 'max:255'],
+            'prescription_visit_hours' => ['nullable', 'string', 'max:500'],
+            'prescription_chamber_name' => ['nullable', 'string', 'max:255'],
+            'prescription_chamber_address' => ['nullable', 'string', 'max:1000'],
+            'prescription_youtube_text' => ['nullable', 'string', 'max:255'],
+            'prescription_facebook_text' => ['nullable', 'string', 'max:255'],
+            'prescription_specialties' => ['nullable', 'string', 'max:1000'],
+            'prescription_footer_text' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $currentSettings = Setting::pluck('value', 'key')->all();
@@ -83,6 +96,24 @@ class SettingController extends Controller
             'social_tiktok' => $validated['social_tiktok'] ?? ($currentSettings['social_tiktok'] ?? null),
             'show_portfolio_sections' => $validated['show_portfolio_sections'] ?? ($currentSettings['show_portfolio_sections'] ?? '1'),
         ];
+
+        foreach ([
+            'prescription_doctor_name',
+            'prescription_credentials',
+            'prescription_serial_label',
+            'prescription_phone',
+            'prescription_serial_hours',
+            'prescription_visit_label',
+            'prescription_visit_hours',
+            'prescription_chamber_name',
+            'prescription_chamber_address',
+            'prescription_youtube_text',
+            'prescription_facebook_text',
+            'prescription_specialties',
+            'prescription_footer_text',
+        ] as $key) {
+            $settings[$key] = $validated[$key] ?? ($currentSettings[$key] ?? null);
+        }
 
         $settings['logo_url'] = $request->hasFile('logo_file')
             ? Helper::storeUploadedImage($request, 'logo_file', 'uploads/settings', $currentSettings['logo_url'] ?? null)

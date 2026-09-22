@@ -4,7 +4,7 @@
 <div class="container mx-auto py-8">
     
     <!-- Action Buttons (Top) -->
-    <div class="max-w-[850px] mx-auto mb-4 flex justify-between items-center print:hidden">
+    <div class="print-controls max-w-[850px] mx-auto mb-4 flex justify-between items-center print:hidden">
         <a href="{{ route('admin.appointments.show', $prescription->appointment_id) }}" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg shadow hover:bg-slate-300 transition-colors inline-flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Back
@@ -18,7 +18,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 Download PDF
             </a>
-            <button onclick="window.print()" class="px-4 py-2 bg-[#1e3a8a] text-white font-bold rounded-lg shadow hover:bg-[#152c6b] transition-colors inline-flex items-center gap-2">
+            <button type="button" onclick="window.print()" class="px-4 py-2 bg-[#1e3a8a] text-white font-bold rounded-lg shadow hover:bg-[#152c6b] transition-colors inline-flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 Print
             </button>
@@ -26,53 +26,45 @@
         </div>
     </div>
 
+    @foreach($medicinePages as $pageIndex => $medicinePage)
+    @php $isLastPage = $loop->last; @endphp
     <!-- Printable Prescription Card -->
-    <div id="printable-prescription" class="bg-white shadow-lg mx-auto w-full max-w-[850px] border border-gray-200 flex flex-col relative text-slate-800 rounded-sm print:shadow-none print:border-none" style="font-family: Arial, sans-serif;">
+    <div class="printable-prescription bg-white shadow-lg mx-auto mb-6 w-full max-w-[850px] border border-gray-200 flex flex-col relative text-slate-800 rounded-sm print:shadow-none print:border-none" style="font-family: Arial, sans-serif; page-break-after: {{ $isLastPage ? 'auto' : 'always' }};">
         
         <!-- Header Section -->
-        <div class="flex justify-between items-start pt-8 pb-4 px-8">
-            <div class="w-2/5">
-                <h2 class="text-2xl font-bold text-[#1e3a8a] mb-1" style="font-family: 'SolaimanLipi', serif;">ডাঃ মোঃ রায়হান উদ্দিন</h2>
-                <p class="text-xs font-semibold leading-tight text-slate-700">এমবিবিএস (সি.ইউ), ডিডি (ইউ.কে)<br>ডিভিএস (চর্ম ও যৌন)</p>
-                <p class="text-[10px] leading-tight text-slate-600 mt-1">
-                    সিসিডি (বারডেম-ডায়াবেটিস)<br>
-                    এফসিজিপি (ফ্যামিলি মেডিসিন)<br>
-                    পিজিটি (মেডিসিন)<br>
-                    ঢাকা মেডিকেল কলেজ ও হাসপাতাল<br>
-                    ট্রেইন্ড ইন এস্থেটিকস, লেজার, হেয়ার ট্রান্সপ্লান্ট এন্ড ডার্মাটোসার্জারী<br>
-                    মাস্টার্স ইন মেল (Male) ইনফার্টিলিটি (ইউএসএ)<br>
-                    ফেলোশীপ ইন সেক্সুয়াল মেডিসিন (চেন্নাই, ইন্ডিয়া)।<br>
-                    বিএমডিসি রেজিঃ <strong>A-81796</strong>
-                </p>
+        <div class="prescription-header flex justify-between items-start pt-8 pb-4 px-8">
+            <div class="prescription-header-column w-2/5">
+                <h2 class="text-2xl font-bold text-[#1e3a8a] mb-1" style="font-family: 'SolaimanLipi', serif;">{{ $settings['prescription_doctor_name'] ?? 'ডাঃ মোঃ রায়হান উদ্দিন' }}</h2>
+                <p class="text-xs font-semibold leading-tight text-slate-700 whitespace-pre-line">{{ $settings['prescription_credentials'] ?? "এমবিবিএস (সি.ইউ), ডিডি (ইউ.কে)\nডিভিএস (চর্ম ও যৌন)\nসিসিডি (বারডেম-ডায়াবেটিস)\nএফসিজিপি (ফ্যামিলি মেডিসিন)\nপিজিটি (মেডিসিন)\nঢাকা মেডিকেল কলেজ ও হাসপাতাল\nট্রেইন্ড ইন এস্থেটিকস, লেজার, হেয়ার ট্রান্সপ্লান্ট এন্ড ডার্মাটোসার্জারী\nমাস্টার্স ইন মেল (Male) ইনফার্টিলিটি (ইউএসএ)\nফেলোশীপ ইন সেক্সুয়াল মেডিসিন (চেন্নাই, ইন্ডিয়া)।\nবিএমডিসি রেজিঃ A-81796" }}</p>
             </div>
 
-            <div class="w-1/5 text-center flex flex-col items-center border-x-2 border-transparent">
+            <div class="prescription-header-column w-1/5 text-center flex flex-col items-center border-x-2 border-transparent">
                 <div class="border-2 border-[#1e3a8a] rounded-full px-3 py-1 mb-1 shadow-sm print:shadow-none">
-                    <p class="text-xs font-bold text-[#1e3a8a]">সিরিয়ালের জন্য :</p>
+                    <p class="text-xs font-bold text-[#1e3a8a]">{{ $settings['prescription_serial_label'] ?? 'সিরিয়ালের জন্য :' }}</p>
                 </div>
-                <p class="text-sm font-bold text-red-600 leading-tight">01647-386185<br>01727-375664</p>
-                <p class="text-[10px] text-slate-600">(সকাল ১১ টা - দুপুর ৩ টা পর্যন্ত)</p>
+                <p class="text-sm font-bold text-red-600 leading-tight whitespace-pre-line">{{ $settings['prescription_phone'] ?? "01647-386185\n01727-375664" }}</p>
+                <p class="text-[10px] text-slate-600">{{ $settings['prescription_serial_hours'] ?? '(সকাল ১১ টা - দুপুর ৩ টা পর্যন্ত)' }}</p>
                 
                 <div class="border border-dashed border-red-500 bg-red-50/30 rounded-lg p-1 mt-2 w-full print:bg-transparent">
-                    <p class="text-xs font-bold text-red-600 border-b border-red-200 pb-1 mb-1">রোগী দেখার সময় :</p>
-                    <p class="text-[10px] text-slate-600 leading-tight">প্রতি বৃহস্পতি, শুক্র ও শনিবার<br>(দুপুর ২টা থেকে রাত ১০টা পর্যন্ত)</p>
+                    <p class="text-xs font-bold text-red-600 border-b border-red-200 pb-1 mb-1">{{ $settings['prescription_visit_label'] ?? 'রোগী দেখার সময় :' }}</p>
+                    <p class="text-[10px] text-slate-600 leading-tight whitespace-pre-line">{{ $settings['prescription_visit_hours'] ?? "প্রতি বৃহস্পতি, শুক্র ও শনিবার\n(দুপুর ২টা থেকে রাত ১০টা পর্যন্ত)" }}</p>
                 </div>
                 <p class="text-[9px] mt-2 text-slate-500">চেম্বারে আসার পূর্বে ফোনে যোগাযোগ করে আসবেন।</p>
             </div>
 
-            <div class="w-2/5 text-right flex flex-col items-end">
+            <div class="prescription-header-column w-2/5 text-right flex flex-col items-end">
                 <div class="bg-[#1e3a8a] text-white text-xs px-3 py-1 rounded-sm font-bold mb-2 shadow-sm print:shadow-none print:border print:border-[#1e3a8a] print:text-[#1e3a8a]">চেম্বার :</div>
-                <h3 class="text-lg font-bold text-red-600 mb-1">পিওর সায়েন্টিফিক ডায়াগনস্টিক সার্ভিসেস্ লিঃ</h3>
-                <p class="text-xs text-[#1e3a8a] font-semibold leading-tight">ঢাকা মেডিকেল কলেজ ও হাসপাতাল ইউনিট-২<br>(নতুন বিল্ডিং) গেইটের বিপরীত পার্শ্বে,<br>লাজ ফার্মার সাথে, ঢাকা।</p>
+                <h3 class="text-lg font-bold text-red-600 mb-1">{{ $settings['prescription_chamber_name'] ?? 'পিওর সায়েন্টিফিক ডায়াগনস্টিক সার্ভিসেস্ লিঃ' }}</h3>
+                <p class="text-xs text-[#1e3a8a] font-semibold leading-tight whitespace-pre-line">{{ $settings['prescription_chamber_address'] ?? "ঢাকা মেডিকেল কলেজ ও হাসপাতাল ইউনিট-২\n(নতুন বিল্ডিং) গেইটের বিপরীত পার্শ্বে,\nলাজ ফার্মার সাথে, ঢাকা।" }}</p>
                 <div class="mt-4 text-[10px] text-slate-600 flex flex-col items-end gap-1">
-                    <div class="flex items-center gap-1"><span class="text-red-600">▶</span> Dr.Rayhan Uddin</div>
-                    <div class="flex items-center gap-1"><span class="text-blue-600 font-bold">f</span> facebook.com/rayhan.uddin.33</div>
+                    <div class="flex items-center gap-1"><span class="text-red-600">▶</span> {{ $settings['prescription_youtube_text'] ?? 'Dr.Rayhan Uddin' }}</div>
+                    <div class="flex items-center gap-1"><span class="text-blue-600 font-bold">f</span> {{ $settings['prescription_facebook_text'] ?? 'facebook.com/rayhan.uddin.33' }}</div>
                 </div>
             </div>
         </div>
 
         <div class="bg-pink-100 mt-2 border-y border-pink-200 py-1.5 text-center shadow-inner print:shadow-none print:bg-white">
-            <p class="text-sm font-bold text-[#1e3a8a]">মেডিসিন, ডায়াবেটিস, পুরুষ বন্ধ্যত্ব, এলার্জী, চর্ম ও যৌন রোগে অভিজ্ঞ।</p>
+            <p class="text-sm font-bold text-[#1e3a8a]">{{ $settings['prescription_specialties'] ?? 'মেডিসিন, ডায়াবেটিস, পুরুষ বন্ধ্যত্ব, এলার্জী, চর্ম ও যৌন রোগে অভিজ্ঞ।' }}</p>
         </div>
 
         <!-- Patient Info Bar -->
@@ -99,10 +91,10 @@
             </div>
         </div>
 
-        <div class="flex flex-1 items-stretch min-h-[700px]">
+        <div class="prescription-body flex flex-1 items-stretch min-h-[700px]">
             
             <!-- Left Column: Vitals, Complaints, Diagnosis -->
-            <div class="w-[30%] bg-[#f4f8fc] print:bg-white print:border-r print:border-[#1e3a8a] border-r-2 border-[#1e3a8a] p-5 flex flex-col gap-6 shadow-inner print:shadow-none">
+            <div class="prescription-sidebar w-[30%] bg-[#f4f8fc] print:bg-white print:border-r print:border-[#1e3a8a] border-r-2 border-[#1e3a8a] p-5 flex flex-col gap-6 shadow-inner print:shadow-none">
                 
                 <div class="flex flex-col">
                     <label class="font-bold text-[#1e3a8a] text-sm mb-1.5">C/C:</label>
@@ -157,17 +149,18 @@
             </div>
 
             <!-- Right Column: Rx and Medicines -->
-            <div class="w-[70%] p-8 relative flex flex-col bg-white">
+            <div class="prescription-medicine-column w-[70%] p-8 relative flex flex-col bg-white">
                 <div class="text-5xl font-serif italic font-bold text-[#1e3a8a] mb-8 opacity-90 drop-shadow-sm print:drop-shadow-none">Rx,</div>
+                @if($pageIndex > 0)
+                    <div class="text-xs text-[#1e3a8a] text-right mb-2">Continuation {{ $pageIndex + 1 }}</div>
+                @endif
                 
                 <div class="flex-1 space-y-5">
-                    @forelse($medicinePages as $pageIndex => $medicinePage)
-                        <div class="space-y-5">
-                            @foreach($medicinePage as $index => $medicineData)
-                                @php $globalIndex = ($pageIndex * 17) + $index + 1; @endphp
+                    <div class="space-y-5">
+                            @forelse($medicinePage as $index => $medicineData)
                                 <div class="relative flex gap-4 items-start bg-slate-50 print:bg-white border border-slate-200 print:border-b print:border-x-0 print:border-t-0 print:rounded-none p-4 print:px-0 print:py-3 rounded-lg shadow-sm print:shadow-none">
                                     <div class="flex items-center justify-center bg-[#1e3a8a] text-white font-bold w-7 h-7 rounded-full text-xs shadow-sm mt-1 shrink-0 print:border print:border-[#1e3a8a] print:bg-white print:text-[#1e3a8a]">
-                                        {{ $globalIndex }}
+                                        {{ ($pageIndex * 6) + $index + 1 }}
                                     </div>
 
                                     <div class="flex-1 flex flex-wrap gap-x-4 gap-y-2 items-center">
@@ -196,19 +189,18 @@
                                         @endif
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    @empty
+                            @empty
                         <div class="text-center py-10 text-slate-400 italic">
                             No medicines prescribed.
                         </div>
-                    @endforelse
+                            @endforelse
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Patient Reports & Investigations (Hidden on Print) -->
-        @if(isset($prescription->reports) && $prescription->reports->count() > 0)
+        @if($isLastPage && isset($prescription->reports) && $prescription->reports->count() > 0)
         <div class="p-6 border-t border-slate-200 bg-slate-50 print:hidden">
             <h4 class="font-bold text-[#1e3a8a] text-lg mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -236,11 +228,12 @@
         @endif
 
         <!-- Footer Note -->
-        <div class="border-t-2 border-[#1e3a8a] bg-[#e6f0fa] py-2 text-center text-xs text-red-600 font-semibold shadow-inner print:shadow-none print:bg-white print:border-slate-300" style="font-family: 'SolaimanLipi', serif;">
-            দিন পর আসবেন, সাক্ষাতের সময় ব্যবস্থাপত্র সাথে আনবেন।<br>
+        <div class="prescription-footer border-t-2 border-[#1e3a8a] bg-[#e6f0fa] py-2 text-center text-xs text-red-600 font-semibold shadow-inner print:shadow-none print:bg-white print:border-slate-300" style="font-family: 'SolaimanLipi', serif;">
+            {{ $settings['prescription_footer_text'] ?? 'দিন পর আসবেন, সাক্ষাতের সময় ব্যবস্থাপত্র সাথে আনবেন।' }}<br>
             <span class="text-[10px] text-slate-600 font-normal">বিঃ দ্রঃ অনলাইনে কোনো রোগী দেখা হয়না ও ঔষধ পাঠানো হয়না। শুধুমাত্র সরাসরি চেম্বারে রোগী দেখা হয়।</span>
         </div>
     </div>
+    @endforeach
 </div>
 
 <style>
@@ -251,24 +244,95 @@
     }
 
     @media print {
-        body * {
-            visibility: hidden; /* Hides everything */
+        html,
+        body,
+        main {
+            width: 100% !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
-        
-        #printable-prescription, #printable-prescription * {
-            visibility: visible; /* Shows only the prescription */
+
+        aside,
+        main > .flex.items-center.justify-between,
+        .print-controls,
+        .tostter-container,
+        .container {
+            display: none !important;
+        }
+
+        main > .container {
+            display: block !important;
+            width: 210mm !important;
+            max-width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .printable-prescription,
+        .printable-prescription * {
+            visibility: visible !important;
         }
         
         /* 2. Position and lock the layout to exact A4 dimensions */
-        #printable-prescription {
-            position: absolute;
-            left: 0;
-            top: 0;
+        .printable-prescription {
+            position: relative;
+            display: grid !important;
+            grid-template-rows: auto minmax(0, 1fr) auto;
             width: 210mm;  /* Exact A4 width */
-            min-height: 297mm; /* Exact A4 height */
-            margin: 0;
+            max-width: 210mm !important;
+            height: 297mm; /* Exact A4 height */
+            min-height: 297mm;
+            max-height: 297mm;
+            margin: 0 0 0mm;
             box-sizing: border-box;
             background-color: white;
+            overflow: hidden;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            page-break-after: always !important;
+            break-after: page !important;
+        }
+
+        .printable-prescription:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+        }
+
+        .prescription-body {
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .prescription-footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        .prescription-sidebar {
+            gap: 12px !important;
+            padding: 12px !important;
+        }
+
+        .prescription-header,
+        .prescription-header-column,
+        .prescription-medicine-column {
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            overflow-wrap: anywhere;
+        }
+
+        .prescription-header-column h2,
+        .prescription-header-column h3,
+        .prescription-header-column p,
+        .prescription-medicine-column h4,
+        .prescription-medicine-column p {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .printable-prescription:last-child {
+            margin-bottom: 0;
         }
     }
 </style>

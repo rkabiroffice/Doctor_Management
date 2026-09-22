@@ -13,7 +13,7 @@ use App\Models\Setting;
 use App\Services\PrescriptionPageService;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
-use PDF;
+use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as PDF;
 
 class PrescriptionController extends Controller
 {
@@ -202,7 +202,7 @@ class PrescriptionController extends Controller
         $education = Education::orderBy('year_completed', 'asc')->get();
         $settings = Setting::pluck('value', 'key')->toArray();
         $doctorProfile = DoctorProfile::first();
-        $medicinePages = $pageService->splitMedicines(collect($prescription->prescriptionMedicines), 17);
+        $medicinePages = $pageService->splitMedicines(collect($prescription->prescriptionMedicines));
 
         return view('admin.prescriptions.show', compact('prescription', 'settings', 'doctorProfile', 'education', 'medicinePages'));
     }
@@ -303,7 +303,7 @@ class PrescriptionController extends Controller
         $education = Education::orderByDesc('year_completed')->get();
         $settings = Setting::pluck('value', 'key')->toArray();
         $doctorProfile = DoctorProfile::first();
-        $medicinePages = $pageService->splitMedicines(collect($prescription->prescriptionMedicines), 17);
+        $medicinePages = $pageService->splitMedicines(collect($prescription->prescriptionMedicines));
 
         $config = [
             'format'           => 'A4',
@@ -328,7 +328,7 @@ class PrescriptionController extends Controller
         return $pdf->download($fileName);
     }
 
-    public function downloadSample($format)
+    public function downloadSample(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -376,12 +376,13 @@ class PrescriptionController extends Controller
         ]);
 
         $file = $request->file('file');
-        $extension = $file->getClientOriginalExtension();
+        $extension = strtolower($file->getClientOriginalExtension());
+        $importFile = app(\App\Services\SpreadsheetImportService::class)->open($file);
         $imported = 0;
         $errors = [];
 
-        if (in_array($extension, ['csv', 'txt'])) {
-            $handle = fopen($file->getRealPath(), 'r');
+        if (in_array($extension, ['csv', 'txt', 'xls', 'xlsx'], true)) {
+            $handle = $importFile['handle'];
             $header = fgetcsv($handle);
 
             while (($row = fgetcsv($handle)) !== false) {
@@ -402,7 +403,7 @@ class PrescriptionController extends Controller
                 }
             }
 
-            fclose($handle);
+            app(\App\Services\SpreadsheetImportService::class)->close($importFile);
         }
 
         if ($imported > 0) {
@@ -416,7 +417,7 @@ class PrescriptionController extends Controller
         return redirect()->route('admin.prescriptions.index')->with('error', 'No data was imported. Please check your file format.');
     }
 
-    public function export($format)
+    public function export(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -504,11 +505,7 @@ class PrescriptionController extends Controller
 
             $html .= '</tbody></table></body></html>';
 
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="prescriptions_' . date('Y-m-d_His') . '.pdf"');
-
-            echo $html;
-            exit;
+            return \Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::loadHTML($html)->download('prescriptions_' . date('Y-m-d_His') . '.pdf');
         }
 
         return redirect()->route('admin.prescriptions.index');

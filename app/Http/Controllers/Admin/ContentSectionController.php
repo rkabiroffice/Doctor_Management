@@ -32,7 +32,7 @@ class ContentSectionController extends Controller
         return view('admin.content.index', compact('contentSections'));
     }
 
-    public function update(Request $request, $section)
+    public function update(Request $request, string $section)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -53,10 +53,10 @@ class ContentSectionController extends Controller
         $contentSection = ContentSection::where('section_key', $section)->firstOrFail();
         $contentSection->update($validated);
 
-        return redirect()->route('admin.content.index')->with('success', ucfirst($section).' section updated successfully.');
+        return redirect()->route('admin.content-sections.index')->with('success', ucfirst($section).' section updated successfully.');
     }
 
-    public function export($format)
+    public function export(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -143,17 +143,13 @@ class ContentSectionController extends Controller
 
             $html .= '</tbody></table></body></html>';
 
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="content_sections_' . date('Y-m-d_His') . '.pdf"');
-
-            echo $html;
-            exit;
+            return \Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::loadHTML($html)->download('content_sections_' . date('Y-m-d_His') . '.pdf');
         }
 
-        return redirect()->route('admin.content.index');
+        return redirect()->route('admin.content-sections.index');
     }
 
-    public function downloadSample($format)
+    public function downloadSample(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -189,7 +185,7 @@ class ContentSectionController extends Controller
             exit;
         }
 
-        return redirect()->route('admin.content.index');
+        return redirect()->route('admin.content-sections.index');
     }
 
     public function import(Request $request)
@@ -203,12 +199,13 @@ class ContentSectionController extends Controller
         ]);
 
         $file = $request->file('file');
-        $extension = $file->getClientOriginalExtension();
+        $extension = strtolower($file->getClientOriginalExtension());
+        $importFile = app(\App\Services\SpreadsheetImportService::class)->open($file);
         $imported = 0;
         $errors = [];
 
-        if (in_array($extension, ['csv', 'txt'])) {
-            $handle = fopen($file->getRealPath(), 'r');
+        if (in_array($extension, ['csv', 'txt', 'xls', 'xlsx'], true)) {
+            $handle = $importFile['handle'];
             $header = fgetcsv($handle);
 
             while (($row = fgetcsv($handle)) !== false) {
@@ -231,7 +228,7 @@ class ContentSectionController extends Controller
                 }
             }
 
-            fclose($handle);
+            app(\App\Services\SpreadsheetImportService::class)->close($importFile);
         }
 
         if ($imported > 0) {
@@ -239,9 +236,9 @@ class ContentSectionController extends Controller
             if (count($errors) > 0) {
                 $message .= ' ' . count($errors) . ' rows had errors.';
             }
-            return redirect()->route('admin.content.index')->with('success', $message);
+            return redirect()->route('admin.content-sections.index')->with('success', $message);
         }
 
-        return redirect()->route('admin.content.index')->with('error', 'No data was imported. Please check your file format.');
+        return redirect()->route('admin.content-sections.index')->with('error', 'No data was imported. Please check your file format.');
     }
 }

@@ -108,7 +108,7 @@ class AboutSectionController extends Controller
         return redirect()->route('admin.about.index')->with('success', 'About section deleted successfully.');
     }
 
-    public function export($format)
+    public function export(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -195,17 +195,13 @@ class AboutSectionController extends Controller
             
             $html .= '</tbody></table></body></html>';
             
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="about_sections_' . date('Y-m-d_His') . '.pdf"');
-            
-            echo $html;
-            exit;
+            return \Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::loadHTML($html)->download('about_sections_' . date('Y-m-d_His') . '.pdf');
         }
 
         return redirect()->route('admin.about.index');
     }
 
-    public function downloadSample($format)
+    public function downloadSample(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -255,13 +251,14 @@ class AboutSectionController extends Controller
         ]);
 
         $file = $request->file('file');
-        $extension = $file->getClientOriginalExtension();
+        $extension = strtolower($file->getClientOriginalExtension());
+        $importFile = app(\App\Services\SpreadsheetImportService::class)->open($file);
         
         $imported = 0;
         $errors = [];
 
-        if (in_array($extension, ['csv', 'txt'])) {
-            $handle = fopen($file->getRealPath(), 'r');
+        if (in_array($extension, ['csv', 'txt', 'xls', 'xlsx'], true)) {
+            $handle = $importFile['handle'];
             $header = fgetcsv($handle);
             
             while (($row = fgetcsv($handle)) !== false) {
@@ -282,7 +279,7 @@ class AboutSectionController extends Controller
                 }
             }
             
-            fclose($handle);
+            app(\App\Services\SpreadsheetImportService::class)->close($importFile);
         }
 
         if ($imported > 0) {

@@ -104,9 +104,9 @@
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight mt-3">{{ $about->title }}</h2>
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-10 items-stretch lg:h-[450px]">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch lg:h-[450px]">
             
-            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col justify-center overflow-y-auto order-2 lg:order-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col justify-center overflow-y-auto order-2 lg:order-1">
                 @if($about->subtitle)
                     <h3 class="text-sm text-slate-500 mt-2">{{ $about->subtitle }}</h3>
                 @endif
@@ -114,8 +114,8 @@
             </div>
             
             @if($about->image_url)
-                <div class="h-[300px] lg:h-full w-full lg:w-auto flex-shrink-0 rounded-2xl overflow-hidden shadow-lg order-1 lg:order-2">
-                    <img src="{{ $about->image_url }}" alt="About" class="w-full h-full lg:w-auto object-cover lg:object-contain">
+                <div class="h-[300px] lg:h-full w-full rounded-2xl overflow-hidden shadow-lg order-1 lg:order-2">
+                    <img src="{{ $about->image_url }}" alt="About" class="w-full h-full object-cover lg:object-contain">
                 </div>
             @endif
             
@@ -308,11 +308,11 @@
             <h2 class="text-2xl font-bold text-slate-900 tracking-tight mt-3">Available Consultation Slots</h2>
             <p class="text-sm text-slate-600 mt-4">Visit the doctor at any of our {{ $clinics->count() }} clinic{{ $clinics->count() === 1 ? '' : 's' }} locations based on your convenience.</p>
         </div>
-        <div class="flex flex-wrap justify-center gap-6 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
                 @foreach($clinics as $clinic)
                     @foreach($clinic->schedules as $schedule)
                         @if(!$schedule->is_closed)
-                            <div class="w-full sm:w-[calc(50%-1.5rem)] xl:w-[calc(25%-1.5rem)] bg-gradient-to-br from-brand-50 to-accent-50 rounded-2xl shadow-sm border border-brand-200 p-6 hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div class="w-full bg-gradient-to-br from-brand-50 to-accent-50 rounded-2xl shadow-sm border border-brand-200 p-6 hover:shadow-lg transition-all duration-300 flex flex-col">
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -173,6 +173,7 @@ Route::middleware('admin')->group(function () {
     Route::delete('/admin/medicines/{medicine}', [MedicineController::class, 'destroy'])->name('admin.medicines.destroy');
     Route::get('/admin/medicines/search', [MedicineController::class, 'search'])->name('admin.medicines.search');
     Route::get('/admin/medicines/export/{format}', [MedicineController::class, 'export'])->name('admin.medicines.export');
+    Route::get('/admin/medicines/transfers/{transfer}/download', [MedicineController::class, 'downloadTransfer'])->name('admin.medicines.transfers.download');
     Route::get('/admin/medicines/sample/{format}', [MedicineController::class, 'downloadSample'])->name('admin.medicines.sample');
     Route::post('/admin/medicines/import', [MedicineController::class, 'import'])->name('admin.medicines.import');
 

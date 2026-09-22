@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ExportMedicinesJob;
+use App\Jobs\ImportMedicinesJob;
 use App\Models\Medicine;
+use App\Models\MedicineTransfer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MedicineController extends Controller
 {
@@ -104,13 +108,15 @@ class MedicineController extends Controller
             return response()->json(['medicines' => []]);
         }
 
-        $medicines = Medicine::where(function ($query) use ($search) {
-                $query->whereNotNull('name')
-                    ->where('name', 'like', '%'.$search.'%');
-            })
+        $medicines = Medicine::where('name', 'like', '%'.$search.'%')
             ->orWhere(function ($query) use ($search) {
                 $query->whereNull('name')
                     ->where('generic_name', 'like', '%'.$search.'%');
+            })
+            ->orWhere(function ($query) use ($search) {
+                $query->whereNull('name')
+                    ->whereNull('generic_name')
+                    ->where('strength', 'like', '%'.$search.'%');
             })
             ->orderBy('name')
             ->limit(10)
@@ -119,104 +125,46 @@ class MedicineController extends Controller
         return response()->json(['medicines' => $medicines]);
     }
 
-    public function export($format)
+    public function export(Request $request, string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
         }
 
-        $medicines = Medicine::orderBy('name')->get();
-
-        if ($format === 'csv') {
-            $filename = 'medicines_' . date('Y-m-d_His') . '.csv';
-            $handle = fopen('php://output', 'w');
-            
-            header('Content-Type: text/csv');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            
-            fputcsv($handle, ['Name', 'Generic Name', 'Strength', 'Dosage Form', 'Manufacturer', 'Notes']);
-            
-            if ($medicines->isEmpty()) {
-                fputcsv($handle, ['No data available', '', '', '', '', '']);
-            } else {
-                foreach ($medicines as $medicine) {
-                    fputcsv($handle, [
-                        $medicine->name,
-                        $medicine->generic_name ?? '',
-                        $medicine->strength ?? '',
-                        $medicine->dosage_form ?? '',
-                        $medicine->manufacturer ?? '',
-                        $medicine->notes ?? ''
-                    ]);
-                }
-            }
-            
-            fclose($handle);
-            exit;
+        if (! in_array($format, ['csv', 'excel', 'pdf'], true)) {
+            return redirect()->route('admin.medicines.index')->with('error', 'Unsupported export format.');
         }
 
-        if ($format === 'excel') {
-            $filename = 'medicines_' . date('Y-m-d_His') . '.xls';
-            
-            header('Content-Type: application/vnd.ms-excel');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            
-            echo '<table border="1">';
-            echo '<thead><tr><th>Name</th><th>Generic Name</th><th>Strength</th><th>Dosage Form</th><th>Manufacturer</th><th>Notes</th></tr></thead>';
-            echo '<tbody>';
-            
-            if ($medicines->isEmpty()) {
-                echo '<tr><td colspan="6" style="text-align:center;">No data available</td></tr>';
-            } else {
-                foreach ($medicines as $medicine) {
-                    echo '<tr>';
-                    echo '<td>' . htmlspecialchars($medicine->name) . '</td>';
-                    echo '<td>' . htmlspecialchars($medicine->generic_name ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($medicine->strength ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($medicine->dosage_form ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($medicine->manufacturer ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($medicine->notes ?? '') . '</td>';
-                    echo '</tr>';
-                }
-            }
-            
-            echo '</tbody></table>';
-            exit;
-        }
+        $transfer = MedicineTransfer::create([
+            'type' => 'export',
+            'format' => $format,
+            'status' => 'queued',
+        ]);
 
-        if ($format === 'pdf') {
-            $html = '<html><head><style>body{font-family:Arial,sans-serif;font-size:12px;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:8px;text-align:left;}th{background-color:#f4f4f4;font-weight:bold;}h1{text-align:center;color:#333;}</style></head><body>';
-            $html .= '<h1>Medicines Report</h1>';
-            $html .= '<p>Generated on: ' . date('d M Y H:i:s') . '</p>';
-            $html .= '<table><thead><tr><th>Name</th><th>Generic</th><th>Strength</th><th>Form</th><th>Manufacturer</th></tr></thead><tbody>';
-            
-            if ($medicines->isEmpty()) {
-                $html .= '<tr><td colspan="5" style="text-align:center;">No data available</td></tr>';
-            } else {
-                foreach ($medicines as $medicine) {
-                    $html .= '<tr>';
-                    $html .= '<td>' . htmlspecialchars($medicine->name) . '</td>';
-                    $html .= '<td>' . htmlspecialchars($medicine->generic_name ?? 'N/A') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($medicine->strength ?? 'N/A') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($medicine->dosage_form ?? 'N/A') . '</td>';
-                    $html .= '<td>' . htmlspecialchars($medicine->manufacturer ?? 'N/A') . '</td>';
-                    $html .= '</tr>';
-                }
-            }
-            
-            $html .= '</tbody></table></body></html>';
-            
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename="medicines_' . date('Y-m-d_His') . '.pdf"');
-            
-            echo $html;
-            exit;
-        }
+        ExportMedicinesJob::dispatch($transfer->id);
 
-        return redirect()->route('admin.medicines.index');
+        session()->flash('success', 'Export queued. Keep the queue worker running to generate the file.');
+
+        return $this->index($request);
     }
 
-    public function downloadSample($format)
+    public function downloadTransfer(MedicineTransfer $transfer)
+    {
+        if (! session('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
+        if ($transfer->type !== 'export' || $transfer->status !== 'completed' || ! $transfer->file_path || ! Storage::disk('local')->exists($transfer->file_path)) {
+            return redirect()->route('admin.medicines.index')->with('error', 'This export is not ready.');
+        }
+
+        return response()->download(
+            Storage::disk('local')->path($transfer->file_path),
+            basename($transfer->file_path)
+        );
+    }
+
+    public function downloadSample(string $format)
     {
         if (! session('admin_logged_in')) {
             return redirect()->route('admin.login');
@@ -267,60 +215,25 @@ class MedicineController extends Controller
             return redirect()->route('admin.login');
         }
 
-        // Increased max file size to 10MB
         $request->validate([
-            'file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:10240']
+            'file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:102400'],
         ]);
 
         $file = $request->file('file');
         $extension = $file->getClientOriginalExtension();
-        
-        $imported = 0;
+        $path = $file->store('medicine-imports', 'local');
+        $transfer = MedicineTransfer::create([
+            'type' => 'import',
+            'format' => strtolower($extension),
+            'file_path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'status' => 'queued',
+        ]);
 
-        if (in_array($extension, ['csv', 'txt'])) {
-            $handle = fopen($file->getRealPath(), 'r');
-            $header = fgetcsv($handle); // Skip the header row
-            
-            $medicinesChunk = [];
-            $chunkSize = 500; // Adjust based on your server memory
+        ImportMedicinesJob::dispatch($transfer->id);
 
-            while (($row = fgetcsv($handle)) !== false) {
-                // Skip empty rows
-                if (count($row) < 1 || empty($row[0])) continue;
-                
-                // Prepare array for bulk insert
-                $medicinesChunk[] = [
-                    'name' => $row[0] ?? '',
-                    'generic_name' => $row[1] ?? null,
-                    'strength' => $row[2] ?? null,
-                    'dosage_form' => $row[3] ?? null,
-                    'manufacturer' => $row[4] ?? null,
-                    'notes' => $row[5] ?? null,
-                    'created_at' => now(), // Required when using insert()
-                    'updated_at' => now(),
-                ];
+        session()->flash('success', 'Import queued. The medicines will appear after the queue worker finishes.');
 
-                // When chunk size is reached, execute 1 bulk insert query
-                if (count($medicinesChunk) >= $chunkSize) {
-                    Medicine::insert($medicinesChunk);
-                    $imported += count($medicinesChunk);
-                    $medicinesChunk = []; // Reset the chunk
-                }
-            }
-            
-            // Insert any remaining records that didn't fill the last chunk
-            if (!empty($medicinesChunk)) {
-                Medicine::insert($medicinesChunk);
-                $imported += count($medicinesChunk);
-            }
-            
-            fclose($handle);
-            
-            return redirect()->route('admin.medicines.index')
-                            ->with('success', "Successfully imported {$imported} medicines.");
-        }
-
-        return redirect()->route('admin.medicines.index')
-                        ->with('error', 'Failed to import medicines. Please check your file format.');
+        return $this->index($request);
     }
 }

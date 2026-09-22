@@ -49,27 +49,18 @@
     </style>
 </head>
 <body>
+@foreach($medicinePages as $pageIndex => $medicinePage)
 
     <!-- Main Wrapper -->
-    <div style="border: 1px solid #e2e8f0; margin: 0 auto; max-width: 800px; width: 100%;">
+    <div style="border: 1px solid #e2e8f0; margin: 0 auto; max-width: 800px; width: 100%; page-break-after: {{ $loop->last ? 'auto' : 'always' }};">
         <div style="width: 100%;">        
             <!-- HEADER SECTION -->
             <table class="p-4">
                 <tr>
                     <!-- Doctor Info (Left) -->
                     <td width="40%" height="220" valign="top" style="padding: 20px;">
-                        <h2 class="text-xl font-bold text-primary bangla" style="margin: 0 0 5px 0;">ডাঃ মোঃ রায়হান উদ্দিন</h2>
-                        <p class="text-sm font-bold" style="margin: 0 0 5px 0;">এমবিবিএস (সি.ইউ), ডিডি (ইউ.কে)<br>ডিভিএস (চর্ম ও যৌন)</p>
-                        <p class="text-xs bangla" style="margin: 0; color: #475569; line-height: 1.4;">
-                            সিসিডি (বারডেম-ডায়াবেটিস)<br>
-                            এফসিজিপি (ফ্যামিলি মেডিসিন)<br>
-                            পিজিটি (মেডিসিন)<br>
-                            ঢাকা মেডিকেল কলেজ ও হাসপাতাল<br>
-                            ট্রেইন্ড ইন এস্থেটিকস, লেজার, হেয়ার ট্রান্সপ্লান্ট এন্ড ডার্মাটোসার্জারী<br>
-                            মাস্টার্স ইন মেল (Male) ইনফার্টিলিটি (ইউএসএ)<br>
-                            ফেলোশীপ ইন সেক্সুয়াল মেডিসিন (চেন্নাই, ইন্ডিয়া)।<br>
-                            বিএমডিসি রেজিঃ <strong style="font-family: Arial;">A-81796</strong>
-                        </p>
+                        <h2 class="text-xl font-bold text-primary bangla" style="margin: 0 0 5px 0;">{{ $settings['prescription_doctor_name'] ?? 'ডাঃ মোঃ রায়হান উদ্দিন' }}</h2>
+                        <p class="text-sm font-bold bangla" style="margin: 0 0 5px 0; white-space: pre-line;">{{ $settings['prescription_credentials'] ?? "এমবিবিএস (সি.ইউ), ডিডি (ইউ.কে)\nডিভিএস (চর্ম ও যৌন)\nসিসিডি (বারডেম-ডায়াবেটিস)\nএফসিজিপি (ফ্যামিলি মেডিসিন)\nপিজিটি (মেডিসিন)\nঢাকা মেডিকেল কলেজ ও হাসপাতাল\nট্রেইন্ড ইন এস্থেটিকস, লেজার, হেয়ার ট্রান্সপ্লান্ট এন্ড ডার্মাটোসার্জারী\nমাস্টার্স ইন মেল (Male) ইনফার্টিলিটি (ইউএসএ)\nফেলোশীপ ইন সেক্সুয়াল মেডিসিন (চেন্নাই, ইন্ডিয়া)।\nবিএমডিসি রেজিঃ A-81796" }}</p>
                     </td>
 
                     <!-- Middle Contact (Center) -->
@@ -77,26 +68,26 @@
     
                         <div style="margin-bottom: 12px;">
                             <span class="text-xs font-bold text-primary bangla" style="border: 2px solid #1e3a8a; padding: 6px 12px; display: inline-block;">
-                                সিরিয়ালের জন্য :
+                                {{ $settings['prescription_serial_label'] ?? 'সিরিয়ালের জন্য :' }}
                             </span>
                         </div>
                         
                         <p class="text-base font-bold text-danger" style="margin: 5px 0 5px 0; font-family: Arial, sans-serif;">
-                            01647-386185<br>01727-375664
+                            {!! nl2br(e($settings['prescription_phone'] ?? "01647-386185\n01727-375664")) !!}
                         </p>
                         
                         <p class="text-xs bangla" style="margin: 0 0 20px 0; color: #475569;">
-                            (সকাল ১১ টা - দুপুর ৩ টা পর্যন্ত)
+                            {{ $settings['prescription_serial_hours'] ?? '(সকাল ১১ টা - দুপুর ৩ টা পর্যন্ত)' }}
                         </p>
                         
                         <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px dashed #ef4444; background-color: #fef2f2;">
                             <tr>
                                 <td align="center" style="padding: 10px;">
                                     <p class="text-xs font-bold text-danger bangla" style="margin: 0 0 5px 0; border-bottom: 1px solid #fecaca; padding-bottom: 5px;">
-                                        রোগী দেখার সময় :
+                                        {{ $settings['prescription_visit_label'] ?? 'রোগী দেখার সময় :' }}
                                     </p>
                                     <p class="text-xs bangla" style="margin: 5px 0 0 0; color: #475569; line-height: 1.4;">
-                                        প্রতি বৃহস্পতি, শুক্র ও শনিবার<br>(দুপুর ২টা থেকে রাত ১০টা পর্যন্ত)
+                                        {!! nl2br(e($settings['prescription_visit_hours'] ?? "প্রতি বৃহস্পতি, শুক্র ও শনিবার\n(দুপুর ২টা থেকে রাত ১০টা পর্যন্ত)")) !!}
                                     </p>
                                 </td>
                             </tr>
@@ -107,17 +98,13 @@
                     <!-- Chamber Info (Right) -->
                     <td width="40%" height="220" valign="top" align="right" style="padding: 20px;">
                         <span class="bg-primary bangla" style="padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 3px;">চেম্বার :</span>
-                        <h3 class="text-lg font-bold text-danger bangla" style="margin: 10px 0 5px 0;">পিওর সায়েন্টিফিক ডায়াগনস্টিক সার্ভিসেস্ লিঃ</h3>
-                        <p class="text-sm font-bold text-primary bangla" style="margin: 0 0 15px 0; line-height: 1.4;">
-                            ঢাকা মেডিকেল কলেজ ও হাসপাতাল ইউনিট-২<br>
-                            (নতুন বিল্ডিং) গেইটের বিপরীত পার্শ্বে,<br>
-                            লাজ ফার্মার সাথে, ঢাকা।
-                        </p>
+                        <h3 class="text-lg font-bold text-danger bangla" style="margin: 10px 0 5px 0;">{{ $settings['prescription_chamber_name'] ?? 'পিওর সায়েন্টিফিক ডায়াগনস্টিক সার্ভিসেস্ লিঃ' }}</h3>
+                        <p class="text-sm font-bold text-primary bangla" style="margin: 0 0 15px 0; line-height: 1.4; white-space: pre-line;">{{ $settings['prescription_chamber_address'] ?? "ঢাকা মেডিকেল কলেজ ও হাসপাতাল ইউনিট-২\n(নতুন বিল্ডিং) গেইটের বিপরীত পার্শ্বে,\nলাজ ফার্মার সাথে, ঢাকা।" }}</p>
                         <table width="100%">
                             <tr>
                                 <td align="right" class="text-xs" style="color: #475569;">
-                                    <span class="text-danger">YT</span> Dr.Rayhan Uddin<br>
-                                    <span style="color: #2563eb; font-weight: bold;">f</span> facebook.com/rayhan.uddin.33
+                                    <span class="text-danger">YT</span> {{ $settings['prescription_youtube_text'] ?? 'Dr.Rayhan Uddin' }}<br>
+                                    <span style="color: #2563eb; font-weight: bold;">f</span> {{ $settings['prescription_facebook_text'] ?? 'facebook.com/rayhan.uddin.33' }}
                                 </td>
                             </tr>
                         </table>
@@ -127,7 +114,7 @@
 
             <!-- Specialties Banner -->
             <div style="background-color: #fce7f3; border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; text-align: center; padding: 6px 0;">
-                <p class="text-sm font-bold text-primary bangla" style="margin: 0;">মেডিসিন, ডায়াবেটিস, পুরুষ বন্ধ্যত্ব, এলার্জী, চর্ম ও যৌন রোগে অভিজ্ঞ।</p>
+                <p class="text-sm font-bold text-primary bangla" style="margin: 0;">{{ $settings['prescription_specialties'] ?? 'মেডিসিন, ডায়াবেটিস, পুরুষ বন্ধ্যত্ব, এলার্জী, চর্ম ও যৌন রোগে অভিজ্ঞ।' }}</p>
             </div>
 
             <!-- Patient Info Bar -->
@@ -254,15 +241,18 @@
                             Rx,
                         </div>
 
+                        @if($pageIndex > 0)
+                            <div class="text-xs text-primary" style="text-align: right; margin-bottom: 8px;">Continuation {{ $pageIndex + 1 }}</div>
+                        @endif
+
                         <!-- Medicines Loop -->
                         <table width="100%">
-                            @forelse($medicinePages as $pageIndex => $medicinePage)
-                                @foreach($medicinePage as $index => $medicineData)
-                                    @php $globalIndex = ($pageIndex * 17) + $index + 1; @endphp
+                            @forelse($medicinePage as $index => $medicineData)
+                                    @php $pageIndexNumber = ($pageIndex * 6) + $index + 1; @endphp
                                     <tr>
                                         <td width="5%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
                                             <div style="width: 20px; height: 20px; border: 2px solid #1e3a8a; border-radius: 50%; text-align: center; line-height: 20px; font-weight: bold; color: #1e3a8a; font-size: 11px;">
-                                                {{ $globalIndex }}
+                                                {{ $pageIndexNumber }}
                                             </div>
                                         </td>
                                         <td width="55%" style="padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-left: 10px;">
@@ -284,7 +274,6 @@
                                             <span class="font-bold bangla" style="color: #334155; font-size: 13px;">{{ $medicineData->duration }}</span>
                                         </td>
                                     </tr>
-                                @endforeach
                             @empty
                             <tr>
                                 <td colspan="4" align="center" style="padding: 40px; color: #94a3b8; font-style: italic;">
@@ -300,7 +289,7 @@
             <!-- Footer -->
             <div class="border-top" style="background-color: #e6f0fa; text-align: center; padding: 15px;">
                 <div class="text-danger font-bold bangla" style="font-size: 13px; margin-bottom: 4px;">
-                    দিন পর আসবেন, সাক্ষাতের সময় ব্যবস্থাপত্র সাথে আনবেন।
+                    {{ $settings['prescription_footer_text'] ?? 'দিন পর আসবেন, সাক্ষাতের সময় ব্যবস্থাপত্র সাথে আনবেন।' }}
                 </div>
                 <div class="bangla" style="font-size: 10px; color: #475569;">
                     বিঃ দ্রঃ অনলাইনে কোনো রোগী দেখা হয়না ও ঔষধ পাঠানো হয়না। শুধুমাত্র সরাসরি চেম্বারে রোগী দেখা হয়।
@@ -308,5 +297,6 @@
             </div>
         </div>
     </div>
+@endforeach
 </body>
 </html>

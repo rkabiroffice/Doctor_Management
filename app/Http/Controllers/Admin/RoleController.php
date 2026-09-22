@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as PDF;
 
 class RoleController extends Controller
 {
@@ -126,5 +127,107 @@ class RoleController extends Controller
         $user->update(['role_id' => $validated['role_id']]);
 
         return redirect()->route('admin.roles.index')->with('success', 'User role assigned successfully.');
+    }
+
+    public function export(string $format)
+    {
+        if (! session('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
+        if (! in_array($format, ['csv', 'excel', 'pdf'], true)) {
+            return redirect()->route('admin.roles.index')->with('error', 'Unsupported export format.');
+        }
+
+        $filename = 'roles_'.now()->format('Y-m-d_His');
+        $roles = Role::orderBy('name')->get();
+
+        if ($format === 'pdf') {
+            $html = view('admin.roles.export', compact('roles'))->render();
+
+            return PDF::loadHTML($html)->download($filename.'.pdf');
+        }
+
+        return response()->streamDownload(function () use ($roles, $format) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name', 'Description', 'Permissions']);
+
+            foreach ($roles as $role) {
+                fputcsv($handle, [
+                    $role->name,
+                    $role->description,
+                    implode(', ', $role->permissions ?? []),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename.'.'.($format === 'excel' ? 'xls' : 'csv'), [
+            'Content-Type' => $format === 'excel' ? 'application/vnd.ms-excel' : 'text/csv',
+        ]);
+    }
+
+    public function downloadSample(string $format)
+    {
+        if (! session('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
+        if (! in_array($format, ['csv', 'excel'], true)) {
+            return redirect()->route('admin.roles.index')->with('error', 'Unsupported sample format.');
+        }
+
+        return response()->streamDownload(function () {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name', 'Description', 'Permissions']);
+            fputcsv($handle, ['Doctor', 'Doctor permissions', 'manage_appointments, manage_prescriptions']);
+            fclose($handle);
+        }, 'roles_sample.'.($format === 'excel' ? 'xls' : 'csv'));
+    }
+
+    public function import(Request $request)
+    {
+        if (! session('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:10240'],
+        ]);
+
+        $importFile = app(\App\Services\SpreadsheetImportService::class)->open($validated['file']);
+        $handle = $importFile['handle'];
+        $header = fgetcsv($handle);
+        $imported = 0;
+        $errors = 0;
+
+        while (($row = fgetcsv($handle)) !== false) {
+            if (blank($row[0] ?? null)) {
+                continue;
+            }
+
+            try {
+                Role::create([
+                    'name' => trim($row[0]),
+                    'description' => $row[1] ?? null,
+                    'permissions' => collect(explode(',', $row[2] ?? ''))->map(fn ($permission) => trim($permission))->filter()->values()->all(),
+                ]);
+                $imported++;
+            } catch (\Throwable) {
+                $errors++;
+            }
+        }
+
+        app(\App\Services\SpreadsheetImportService::class)->close($importFile);
+
+        if ($imported === 0) {
+            return redirect()->route('admin.roles.index')->with('error', 'No valid roles were imported.');
+        }
+
+        $message = "Successfully imported {$imported} roles.";
+        if ($errors > 0) {
+            $message .= " {$errors} rows failed.";
+        }
+
+        return redirect()->route('admin.roles.index')->with('success', $message);
     }
 }
