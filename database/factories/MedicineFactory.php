@@ -29,7 +29,7 @@ class MedicineFactory extends Factory
             'strength' => $medicine['strength'],
             'dosage_form' => $medicine['dosage_form'],
             'manufacturer' => fake()->company(),
-            'notes' => fake()->optional()->sentence(10),
+            'ref of dcc' => fake()->optional()->sentence(10),
         ];
     }
 }

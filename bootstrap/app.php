@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $exception, Request $request) {
-            if ($request->is('admin/*') && $request->expectsHtml()) {
+            if ($request->is('admin/*') && $request->acceptsHtml()) {
                 report($exception);
 
                 return redirect()->back()->with('error', 'The requested operation failed. Please check the file format and try again.');

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,6 +23,23 @@ return new class extends Migration
 
     public function down(): void
     {
+        $foreignKey = DB::selectOne(
+            'SELECT CONSTRAINT_NAME
+             FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = ?
+               AND TABLE_NAME = ?
+               AND COLUMN_NAME = ?
+               AND REFERENCED_TABLE_NAME = ?
+             LIMIT 1',
+            [DB::getDatabaseName(), 'prescription_medicines', 'medicine_id', 'medicines']
+        );
+
+        if ($foreignKey?->CONSTRAINT_NAME) {
+            Schema::table('prescription_medicines', function (Blueprint $table) use ($foreignKey) {
+                $table->dropForeign($foreignKey->CONSTRAINT_NAME);
+            });
+        }
+
         Schema::dropIfExists('medicines');
     }
 };
